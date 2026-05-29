@@ -1,6 +1,6 @@
 # Cloud Deployment Guide
 
-**Stack:** GitHub → GitHub Actions → **Vercel** (frontend) + **Render** (backend) + **Neon** (PostgreSQL) + **Upstash** (Redis)
+**Stack:** GitHub → GitHub Actions → **Vercel** (frontend) + **Northflank** (backend) + **Neon** (PostgreSQL) + **Upstash** (Redis)
 
 ---
 
@@ -11,15 +11,15 @@ GitHub (push)
     ↓
 GitHub Actions — build, test, Docker image validation
     ↓
-┌─────────────────┬─────────────────┐
-│ Vercel          │ Render          │
-│ React frontend  │ Spring Boot API │
-└────────┬────────┴────────┬────────┘
-         │                 │
-         │    ┌────────────┼────────────┐
-         │    ↓            ↓            │
-         │  Neon PG    Upstash Redis    │
-         └──────── (HTTPS API + WS) ────┘
+┌─────────────────┬─────────────────────┐
+│ Vercel          │ Northflank          │
+│ React frontend  │ Spring Boot API     │
+└────────┬────────┴──────────┬──────────┘
+         │                   │
+         │    ┌──────────────┼──────────────┐
+         │    ↓              ↓              │
+         │  Neon PG      Upstash Redis      │
+         └──────── (HTTPS API + WS) ──────────┘
 ```
 
 **User-facing URL:** your Vercel domain (e.g. `https://order-track.vercel.app`)
@@ -46,9 +46,7 @@ Every push to `main` / `develop` runs CI (build + test + Docker validation).
 
 1. Sign up at [neon.tech](https://neon.tech).
 2. **New Project** → name `order-tracking`.
-3. Copy connection details:
-   - Host, database, user, password
-   - Or full connection string
+3. Copy connection details (host, database, user, password).
 4. JDBC URL format:
 
 ```text
@@ -60,42 +58,72 @@ jdbc:postgresql://ep-xxxx.region.aws.neon.tech/neondb?sslmode=require
 ## 3. Upstash (Redis)
 
 1. Sign up at [upstash.com](https://upstash.com).
-2. **Create Database** → Redis → region near your Render region.
-3. Copy from console:
+2. **Create Database** → Redis → pick a region close to your Northflank region.
+3. Copy:
    - **Endpoint** (host)
    - **Port** (usually `6379`)
    - **Password** (token)
-4. Enable TLS (Upstash uses `rediss://`).
+4. Use TLS: set `SPRING_DATA_REDIS_SSL=true` on Northflank.
 
 ---
 
-## 4. Render (Spring Boot backend)
+## 4. Northflank (Spring Boot backend only)
 
-1. [render.com](https://render.com) → **New** → **Blueprint** (or Web Service).
-2. Connect GitHub repo.
-3. Use root `render.yaml` or manual **Web Service**:
-   - **Root Directory:** `backend`
-   - **Runtime:** Docker
-   - **Dockerfile:** `backend/Dockerfile`
-   - **Health Check Path:** `/health`
+Guide: [Deploy Spring Boot on Northflank](https://northflank.com/guides/deploy-spring-boot-with-postgresql-on-northflank)
 
-### Environment variables (Render dashboard)
+### 4.1 Create project & service
+
+1. Sign up at [northflank.com](https://northflank.com).
+2. **Create project** → e.g. `order-tracking`.
+3. **Create new** → **Service** → **Combined service** (build + run in one).
+4. Name: `order-tracking-backend`.
+
+### 4.2 Connect GitHub
+
+1. **Repository** → connect GitHub → select your repo.
+2. **Branch:** `main` (or your deploy branch).
+3. Enable **Build on push** if you want automatic redeploys.
+
+### 4.3 Build configuration
+
+| Setting | Value |
+|---------|--------|
+| Build type | **Dockerfile** |
+| Dockerfile path | `backend/Dockerfile` |
+| Build context | `backend` |
+| Port | `8080` |
+
+The repo Dockerfile already has `EXPOSE 8080` and builds the Spring Boot JAR.
+
+### 4.4 Networking & health check
+
+1. **Ports** → add port `8080` (HTTP).
+2. **Health check** → HTTP GET `/health` on port `8080`.
+3. After deploy, copy your public URL (e.g. `https://order-tracking-backend--xxx.code.run`).
+
+### 4.5 Environment variables
+
+Add all variables from **[northflank/BACKEND-ENV.md](./northflank/BACKEND-ENV.md)** in the Northflank dashboard.
+
+Minimum set:
 
 | Key | Value |
 |-----|--------|
-| `SPRING_DATASOURCE_URL` | Neon JDBC URL (`?sslmode=require`) |
+| `SPRING_DATASOURCE_URL` | Neon JDBC URL with `?sslmode=require` |
 | `SPRING_DATASOURCE_USERNAME` | Neon user |
 | `SPRING_DATASOURCE_PASSWORD` | Neon password |
-| `SPRING_DATA_REDIS_HOST` | Upstash endpoint host |
+| `SPRING_DATA_REDIS_HOST` | Upstash host |
 | `SPRING_DATA_REDIS_PORT` | `6379` |
 | `SPRING_DATA_REDIS_PASSWORD` | Upstash token |
 | `SPRING_DATA_REDIS_SSL` | `true` |
 | `JWT_SECRET` | Long random string (32+ chars) |
-| `JWT_EXPIRATION` | `86400000` |
-| `SPRING_JPA_DDL_AUTO` | `update` (first deploy) |
 | `SPRING_MVC_CORS_ALLOWED_ORIGINS` | `https://YOUR-APP.vercel.app,http://localhost:3000` |
 
-4. Deploy → note URL: `https://order-tracking-backend.onrender.com`
+### 4.6 Deploy
+
+1. Click **Create service** / **Deploy**.
+2. Wait for build + health check to pass.
+3. Open `https://YOUR-NORTHFLANK-URL/health` → should return `{"status":"UP"}`.
 
 ---
 
@@ -108,18 +136,18 @@ jdbc:postgresql://ep-xxxx.region.aws.neon.tech/neondb?sslmode=require
 
 | Key | Value |
 |-----|--------|
-| `REACT_APP_API_BASE_URL` | `https://YOUR-BACKEND.onrender.com/api` |
-| `REACT_APP_WS_URL` | `https://YOUR-BACKEND.onrender.com/ws` |
+| `REACT_APP_API_BASE_URL` | `https://YOUR-NORTHFLANK-URL/api` |
+| `REACT_APP_WS_URL` | `https://YOUR-NORTHFLANK-URL/ws` |
 
 5. Deploy → note URL: `https://your-app.vercel.app`
 
-6. **Update Render CORS** with your final Vercel URL:
+6. **Update Northflank CORS** with your final Vercel URL:
 
 ```text
 SPRING_MVC_CORS_ALLOWED_ORIGINS=https://your-app.vercel.app,http://localhost:3000
 ```
 
-Redeploy Render after changing CORS.
+Redeploy the Northflank service after changing CORS.
 
 ---
 
@@ -142,23 +170,15 @@ cp .env.example .env
 docker compose up -d --build
 ```
 
-- Frontend: http://localhost (port 80) or run CRA separately on :3000
+- Frontend: http://localhost (port 80) or run CRA on :3000
 - Backend: http://localhost:8080
 
 ### Option B — Manual
 
 ```bash
-# Terminal 1 — Postgres + Redis via Docker
 docker compose up -d postgres redis
-
-# Terminal 2 — Backend
-cd backend
-mvn spring-boot:run
-
-# Terminal 3 — Frontend
-cd frontend
-cp .env.example .env.local
-npm start
+cd backend && mvn spring-boot:run
+cd frontend && cp .env.example .env.local && npm start
 ```
 
 ---
@@ -169,16 +189,9 @@ npm start
 |---------|--------|
 | PR / push | Build backend (Maven), frontend (npm), run tests |
 | All branches | Validate Docker images build |
-| Push `main` | Vercel + Render auto-deploy (if GitHub connected) |
+| Push `main` | Vercel auto-deploy; Northflank auto-build (if enabled) |
 
-### GitHub secrets (optional)
-
-Only needed if you extend workflow to push Docker images:
-
-- `DOCKER_USERNAME`
-- `DOCKER_PASSWORD`
-
-Render/Vercel use their own GitHub integration — no extra secrets required for basic deploy.
+GitHub Actions validates Docker builds; **Northflank** and **Vercel** deploy via their GitHub integrations.
 
 ---
 
@@ -186,11 +199,12 @@ Render/Vercel use their own GitHub integration — no extra secrets required for
 
 | Issue | Fix |
 |-------|-----|
-| CORS error on login | Add exact Vercel URL to `SPRING_MVC_CORS_ALLOWED_ORIGINS` on Render |
-| WebSocket failed | Use `https://` for `REACT_APP_WS_URL`; ensure Render service is awake |
-| DB connection failed | Check Neon `sslmode=require` in JDBC URL |
-| Redis connection failed | Set `SPRING_DATA_REDIS_SSL=true` and Upstash password |
-| 401 on API | Token expired — login again |
+| CORS error on login | Add exact Vercel URL to `SPRING_MVC_CORS_ALLOWED_ORIGINS` on Northflank |
+| WebSocket failed | Use `https://` for `REACT_APP_WS_URL`; check Northflank port 8080 is public |
+| Build failed on Northflank | Confirm Dockerfile path `backend/Dockerfile` and context `backend` |
+| Health check failing | Ensure `/health` is reachable; check logs for DB/Redis connection errors |
+| DB connection failed | Neon URL must include `sslmode=require` |
+| Redis connection failed | `SPRING_DATA_REDIS_SSL=true` + correct Upstash password |
 
 ---
 
@@ -198,7 +212,8 @@ Render/Vercel use their own GitHub integration — no extra secrets required for
 
 | File | Purpose |
 |------|---------|
-| `render.yaml` | Render Blueprint |
+| `backend/Dockerfile` | Northflank Docker build |
+| `northflank/BACKEND-ENV.md` | Env var checklist for Northflank |
 | `frontend/vercel.json` | Vercel SPA routing |
 | `frontend/.env.example` | Frontend env template |
 | `.env.example` | Full stack env template |

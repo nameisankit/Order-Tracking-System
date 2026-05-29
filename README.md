@@ -1,6 +1,6 @@
 # 📦 Order Tracking System
 
-A full-stack Order Tracking System built with **Spring Boot**, **PostgreSQL**, **Redis**, **WebSocket**, **React.js**, with **JWT Authentication**, **Docker**, **CI/CD**, and cloud deployment on **Vercel**, **Render**, **Neon**, and **Upstash**.
+A full-stack Order Tracking System built with **Spring Boot**, **PostgreSQL**, **Redis**, **WebSocket**, **React.js**, with **JWT Authentication**, **Docker**, **CI/CD**, and cloud deployment on **Vercel**, **Northflank**, **Neon**, and **Upstash**.
 
 ---
 
@@ -17,7 +17,7 @@ A full-stack Order Tracking System built with **Spring Boot**, **PostgreSQL**, *
 - 🌐 **REST API** – Clean endpoints documented below
 - 🐳 **Docker** – Containerized deployment
 - 🚀 **CI/CD** – Automated deployment with GitHub Actions
-- ☁️ **Cloud Deploy** – Vercel (frontend) + Render (backend) + Neon + Upstash
+- ☁️ **Cloud Deploy** – Vercel (frontend) + Northflank (backend) + Neon + Upstash
 
 ---
 
@@ -35,7 +35,7 @@ A full-stack Order Tracking System built with **Spring Boot**, **PostgreSQL**, *
 | Styling   | Custom CSS (dark theme)           |
 | Container | Docker, Docker Compose            |
 | CI/CD     | GitHub Actions                    |
-| Cloud     | Vercel, Render, Neon, Upstash     |
+| Cloud     | Vercel, Northflank, Neon, Upstash |
 
 ---
 
@@ -46,7 +46,7 @@ A full-stack Order Tracking System built with **Spring Boot**, **PostgreSQL**, *
 - Docker & Docker Compose
 - Maven 3.8+
 - GitHub account (for CI/CD)
-- Vercel, Render, Neon, Upstash accounts (for cloud deployment)
+- Vercel, Northflank, Neon, Upstash accounts (for cloud deployment)
 
 ---
 
@@ -275,7 +275,7 @@ order-tracking-system/
 ```
 GitHub → GitHub Actions → Docker Build Validation
                               ↓
-              Vercel (Frontend) + Render (Backend)
+              Vercel (Frontend) + Northflank (Backend)
                               ↓
                     Neon (PostgreSQL) + Upstash (Redis)
 ```
@@ -284,7 +284,7 @@ GitHub → GitHub Actions → Docker Build Validation
 
 - **Push / PR to `main` or `develop`** – Build backend (Maven), frontend (npm), run tests
 - **Docker validation** – Build backend and frontend Docker images (no push required)
-- **Production deploy** – Connect repo to **Vercel** and **Render** for auto-deploy on `main`
+- **Production deploy** – Connect repo to **Vercel** and **Northflank** for auto-deploy on `main`
 
 ### Full deployment guide
 
@@ -292,7 +292,7 @@ See **[DEPLOYMENT.md](./DEPLOYMENT.md)** for step-by-step setup:
 
 1. Neon – PostgreSQL database  
 2. Upstash – Redis  
-3. Render – Spring Boot API  
+3. Northflank – Spring Boot API  
 4. Vercel – React frontend  
 5. CORS + env vars configuration  
 
@@ -327,7 +327,7 @@ jwt.expiration=86400000
 - Change the default JWT secret in production
 - Use strong passwords for database
 - Enable HTTPS in production
-- Set `SPRING_MVC_CORS_ALLOWED_ORIGINS` to your Vercel URL on Render
+- Set `SPRING_MVC_CORS_ALLOWED_ORIGINS` to your Vercel URL on Northflank
 - Regularly update dependencies
 - Use environment variables for sensitive data
 
