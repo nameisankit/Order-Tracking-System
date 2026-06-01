@@ -2,7 +2,7 @@ services:
   - type: web
     name: order-tracking-backend
     env: java
-    buildCommand: ./mvnw clean package -DskipTests
+    buildCommand: mvn clean package -DskipTests
     startCommand: java -jar target/OrderTrackingApplication.jar
     envVars:
       - key: SPRING_DATASOURCE_URL
@@ -21,16 +21,18 @@ services:
         generateValue: true
       - key: JWT_EXPIRATION
         value: 86400000
-      - key: REDIS_HOST
+      - key: SPRING_DATA_REDIS_HOST
         fromService:
           type: redis
           name: order-tracking-redis
           property: host
-      - key: REDIS_PORT
+      - key: SPRING_DATA_REDIS_PORT
         fromService:
           type: redis
           name: order-tracking-redis
           property: port
+      - key: SPRING_MVC_CORS_ALLOWED_ORIGINS
+        value: https://your-app.vercel.app,http://localhost:3000
 
 databases:
   - name: order-tracking-db
