@@ -1,6 +1,8 @@
 # Cloud Deployment Guide
 
-**Stack:** GitHub → GitHub Actions → **Vercel** (frontend) + **Northflank** (backend) + **Neon** (PostgreSQL) + **Upstash** (Redis)
+**Stack Options:**
+- **Option 1:** GitHub → GitHub Actions → **Vercel** (frontend) + **Northflank** (backend) + **Neon** (PostgreSQL) + **Upstash** (Redis)
+- **Option 2:** GitHub → **Render** (backend with built-in PostgreSQL + Redis) + **Vercel** (frontend)
 
 ---
 
@@ -218,3 +220,90 @@ GitHub Actions validates Docker builds; **Northflank** and **Vercel** deploy via
 | `frontend/.env.example` | Frontend env template |
 | `.env.example` | Full stack env template |
 | `.github/workflows/ci-cd.yml` | GitHub Actions pipeline |
+| `render.yaml` | Render deployment configuration |
+
+---
+
+## Render Deployment (Alternative to Northflank)
+
+### Architecture
+
+```
+GitHub (push)
+    ↓
+Render (Backend + PostgreSQL + Redis)
+    ↓
+Vercel (Frontend)
+```
+
+### 1. Deploy Backend on Render
+
+1. Sign up at [render.com](https://render.com).
+2. **New** → **Web Service** → connect your GitHub repository.
+3. Configure:
+   - **Name:** `order-tracking-backend`
+   - **Environment:** Java
+   - **Build Command:** `./mvnw clean package -DskipTests`
+   - **Start Command:** `java -jar target/OrderTrackingApplication.jar`
+   - **Root Directory:** `backend`
+
+4. **Add Database:**
+   - In the Render dashboard, go to your web service
+   - Click **Databases** → **New Database**
+   - Choose **PostgreSQL**
+   - Name: `order-tracking-db`
+   - Render will automatically set environment variables:
+     - `SPRING_DATASOURCE_URL`
+     - `SPRING_DATASOURCE_USERNAME`
+     - `SPRING_DATASOURCE_PASSWORD`
+
+5. **Add Redis:**
+   - Click **Databases** → **New Database**
+   - Choose **Redis**
+   - Name: `order-tracking-redis`
+   - Render will automatically set environment variables:
+     - `SPRING_DATA_REDIS_HOST`
+     - `SPRING_DATA_REDIS_PORT`
+
+6. **Add Environment Variables:**
+   - `JWT_SECRET`: Generate a long random string (32+ characters)
+   - `JWT_EXPIRATION`: `86400000` (24 hours in milliseconds)
+   - `SPRING_MVC_CORS_ALLOWED_ORIGINS`: `https://YOUR-APP.vercel.app,http://localhost:3000`
+
+7. Click **Deploy Web Service**.
+
+### 2. Deploy Frontend on Vercel
+
+Same as Section 5 above, but use your Render backend URL:
+
+| Key | Value |
+|-----|--------|
+| `REACT_APP_API_BASE_URL` | `https://YOUR-RENDER-URL.onrender.com/api` |
+| `REACT_APP_WS_URL` | `https://YOUR-RENDER-URL.onrender.com/ws` |
+
+### 3. Verify
+
+1. Open Render backend URL → `/health` → should return `{"status":"UP"}`
+2. Open Vercel URL → Register / Login
+3. Create an order → check dashboard
+4. Test WebSocket live updates
+
+### Render vs Northflank
+
+| Feature | Render | Northflank |
+|---------|-------|-----------|
+| PostgreSQL | Built-in (free tier) | External (Neon) |
+| Redis | Built-in (free tier) | External (Upstash) |
+| Deployment | Simple YAML config | Docker-based |
+| Free Tier | Yes (with limits) | Yes (with limits) |
+| Complexity | Lower | Higher |
+
+### Troubleshooting (Render)
+
+| Issue | Fix |
+|-------|-----|
+| Backend not starting | Check Render logs; ensure `PORT` variable is set (Render provides it automatically) |
+| DB connection failed | Render auto-sets DB env vars; verify they're present in service settings |
+| Redis connection failed | Render auto-sets Redis env vars; verify they're present |
+| CORS error | Add exact Vercel URL to `SPRING_MVC_CORS_ALLOWED_ORIGINS` |
+| WebSocket failed | Use `https://` for `REACT_APP_WS_URL` |

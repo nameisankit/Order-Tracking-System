@@ -1,0 +1,43 @@
+services:
+  - type: web
+    name: order-tracking-backend
+    env: java
+    buildCommand: ./mvnw clean package -DskipTests
+    startCommand: java -jar target/OrderTrackingApplication.jar
+    envVars:
+      - key: SPRING_DATASOURCE_URL
+        fromDatabase:
+          name: order-tracking-db
+          property: connectionString
+      - key: SPRING_DATASOURCE_USERNAME
+        fromDatabase:
+          name: order-tracking-db
+          property: user
+      - key: SPRING_DATASOURCE_PASSWORD
+        fromDatabase:
+          name: order-tracking-db
+          property: password
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRATION
+        value: 86400000
+      - key: REDIS_HOST
+        fromService:
+          type: redis
+          name: order-tracking-redis
+          property: host
+      - key: REDIS_PORT
+        fromService:
+          type: redis
+          name: order-tracking-redis
+          property: port
+
+databases:
+  - name: order-tracking-db
+    databaseName: order_tracking
+    user: ordertrack_user
+
+  - type: redis
+    name: order-tracking-redis
+    maxmemoryPolicy: allkeys-lru
+    ipAllowList: []
