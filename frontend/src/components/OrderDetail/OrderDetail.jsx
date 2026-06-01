@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { getOrderById, updateOrderStatus } from '../../services/orderService';
-import { ArrowLeft, Edit2, Package, MapPin, User, Mail, Calendar, Truck } from 'lucide-react';
+import { ArrowLeft, Edit2, Package, MapPin, User, Mail, Truck } from 'lucide-react';
 import StatusBadge from '../shared/StatusBadge';
 import toast from 'react-hot-toast';
 
@@ -16,7 +16,7 @@ export default function OrderDetail() {
   const [loading, setLoading] = useState(true);
   const [updatingStatus, setUpdatingStatus] = useState(false);
 
-  const load = async () => {
+  const load = useCallback(async () => {
     try {
       const res = await getOrderById(id);
       setOrder(res.data);
@@ -26,9 +26,9 @@ export default function OrderDetail() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id, navigate]);
 
-  useEffect(() => { load(); }, [id]);
+  useEffect(() => { load(); }, [load]);
 
   const handleStatusUpdate = async (newStatus) => {
     setUpdatingStatus(true);

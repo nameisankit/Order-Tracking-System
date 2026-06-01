@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { trackOrder } from '../../services/orderService';
-import { Search, Package, MapPin, User } from 'lucide-react';
+import { Search, Package, MapPin } from 'lucide-react';
 import StatusBadge from '../shared/StatusBadge';
 
 const PIPELINE = ['PENDING','CONFIRMED','PROCESSING','SHIPPED','OUT_FOR_DELIVERY','DELIVERED'];

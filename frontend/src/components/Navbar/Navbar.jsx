@@ -1,7 +1,7 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
-  LayoutDashboard, ShoppingCart, PlusCircle, Search, Wifi, LogOut, LogIn
+  LayoutDashboard, ShoppingCart, PlusCircle, Search, Wifi, LogOut
 } from 'lucide-react';
 import { logout, getUser } from '../../services/authService';
 
