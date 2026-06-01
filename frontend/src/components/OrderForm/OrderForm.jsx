@@ -86,7 +86,7 @@ export default function OrderForm() {
   const total = (Number(form.quantity) || 0) * (Number(form.price) || 0);
 
   return (
-    <div className="fade-in" style={{ maxWidth: '680px' }}>
+    <div className="fade-in" style={{ maxWidth: '680px', width: '100%' }}>
       <div className="page-header">
         <div>
           <h1 className="page-title">{isEdit ? 'Edit Order' : 'Place New Order'}</h1>
@@ -101,6 +101,7 @@ export default function OrderForm() {
 
       <div className="card">
         <form onSubmit={handleSubmit}>
+
           {/* Customer Info */}
           <div style={{ marginBottom: '24px' }}>
             <h3 style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '16px', textTransform: 'uppercase', letterSpacing: '0.8px' }}>
@@ -201,7 +202,7 @@ export default function OrderForm() {
           )}
 
           {/* Submit */}
-          <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+          <div className="form-actions">
             <button type="button" className="btn btn-outline" onClick={() => navigate(-1)}>
               Cancel
             </button>
@@ -210,8 +211,27 @@ export default function OrderForm() {
               {loading ? 'Saving...' : isEdit ? 'Update Order' : 'Place Order'}
             </button>
           </div>
+
         </form>
       </div>
+
+      <style>{`
+        .form-actions {
+          display: flex;
+          gap: 10px;
+          justify-content: flex-end;
+          flex-wrap: wrap;
+        }
+        @media (max-width: 480px) {
+          .form-actions {
+            flex-direction: column;
+          }
+          .form-actions .btn {
+            width: 100%;
+            justify-content: center;
+          }
+        }
+      `}</style>
     </div>
   );
 }

@@ -17,14 +17,14 @@ export default function OrderList({ onRefresh }) {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('ALL');
   const [search, setSearch] = useState('');
-  const [editingStatus, setEditingStatus] = useState(null); // order id
+  const [editingStatus, setEditingStatus] = useState(null);
 
   const load = async () => {
     setLoading(true);
     try {
       const res = await getAllOrders();
       setOrders(res.data || []);
-    } catch (err) {
+    } catch {
       toast.error('Failed to load orders');
     } finally {
       setLoading(false);
@@ -33,7 +33,6 @@ export default function OrderList({ onRefresh }) {
 
   useEffect(() => { load(); }, []);
 
-  // Allow parent (App) to trigger reload on WS notification
   useEffect(() => {
     if (onRefresh) load();
   }, [onRefresh]);
@@ -76,10 +75,12 @@ export default function OrderList({ onRefresh }) {
         </div>
         <div style={{ display: 'flex', gap: '10px' }}>
           <button className="btn btn-outline" onClick={load}>
-            <RefreshCw size={15} /> Refresh
+            <RefreshCw size={15} />
+            <span className="hide-mobile">Refresh</span>
           </button>
           <Link to="/orders/new" className="btn btn-primary">
-            <PlusCircle size={15} /> New Order
+            <PlusCircle size={15} />
+            <span className="hide-mobile">New Order</span>
           </Link>
         </div>
       </div>
@@ -88,14 +89,14 @@ export default function OrderList({ onRefresh }) {
       <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', flexWrap: 'wrap' }}>
         <input
           className="form-input"
-          style={{ maxWidth: '280px' }}
-          placeholder="Search by name, email, product..."
+          style={{ flex: 1, minWidth: '160px', maxWidth: '280px' }}
+          placeholder="Search orders..."
           value={search}
           onChange={e => setSearch(e.target.value)}
         />
         <select
           className="form-select"
-          style={{ maxWidth: '180px' }}
+          style={{ width: 'auto', minWidth: '140px' }}
           value={filter}
           onChange={e => setFilter(e.target.value)}
         >
@@ -119,21 +120,21 @@ export default function OrderList({ onRefresh }) {
           <table>
             <thead>
               <tr>
-                <th>ID</th>
+                <th className="hide-mobile">ID</th>
                 <th>Tracking #</th>
                 <th>Customer</th>
-                <th>Product</th>
-                <th>Qty</th>
+                <th className="hide-mobile">Product</th>
+                <th className="hide-mobile">Qty</th>
                 <th>Total</th>
                 <th>Status</th>
-                <th>Date</th>
+                <th className="hide-mobile">Date</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               {filtered.map(order => (
                 <tr key={order.id}>
-                  <td style={{ color: 'var(--text-muted)', fontSize: '13px' }}>#{order.id}</td>
+                  <td className="hide-mobile" style={{ color: 'var(--text-muted)', fontSize: '13px' }}>#{order.id}</td>
                   <td>
                     <code style={{ fontSize: '12px', color: 'var(--accent)', background: 'var(--accent-light)', padding: '2px 6px', borderRadius: '4px' }}>
                       {order.trackingNumber}
@@ -141,10 +142,10 @@ export default function OrderList({ onRefresh }) {
                   </td>
                   <td>
                     <div><strong>{order.customerName}</strong></div>
-                    <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{order.customerEmail}</div>
+                    <div className="hide-mobile" style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{order.customerEmail}</div>
                   </td>
-                  <td>{order.productName}</td>
-                  <td style={{ textAlign: 'center' }}>{order.quantity}</td>
+                  <td className="hide-mobile">{order.productName}</td>
+                  <td className="hide-mobile" style={{ textAlign: 'center' }}>{order.quantity}</td>
                   <td><strong>${order.totalAmount?.toFixed(2)}</strong></td>
                   <td>
                     {editingStatus === order.id ? (
@@ -161,39 +162,23 @@ export default function OrderList({ onRefresh }) {
                         ))}
                       </select>
                     ) : (
-                      <div
-                        style={{ cursor: 'pointer' }}
-                        onClick={() => setEditingStatus(order.id)}
-                        title="Click to change status"
-                      >
+                      <div style={{ cursor: 'pointer' }} onClick={() => setEditingStatus(order.id)} title="Click to change status">
                         <StatusBadge status={order.status} />
                       </div>
                     )}
                   </td>
-                  <td style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
+                  <td className="hide-mobile" style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
                     {new Date(order.createdAt).toLocaleDateString()}
                   </td>
                   <td>
                     <div style={{ display: 'flex', gap: '6px' }}>
-                      <Link
-                        to={`/orders/${order.id}`}
-                        className="btn btn-outline btn-sm"
-                        title="View detail"
-                      >
+                      <Link to={`/orders/${order.id}`} className="btn btn-outline btn-sm" title="View">
                         <Eye size={13} />
                       </Link>
-                      <Link
-                        to={`/orders/${order.id}/edit`}
-                        className="btn btn-outline btn-sm"
-                        title="Edit order"
-                      >
+                      <Link to={`/orders/${order.id}/edit`} className="btn btn-outline btn-sm" title="Edit">
                         <Edit2 size={13} />
                       </Link>
-                      <button
-                        className="btn btn-danger btn-sm"
-                        onClick={() => handleDelete(order.id)}
-                        title="Delete order"
-                      >
+                      <button className="btn btn-danger btn-sm" onClick={() => handleDelete(order.id)} title="Delete">
                         <Trash2 size={13} />
                       </button>
                     </div>
@@ -204,6 +189,12 @@ export default function OrderList({ onRefresh }) {
           </table>
         </div>
       )}
+
+      <style>{`
+        @media (max-width: 768px) {
+          .hide-mobile { display: none !important; }
+        }
+      `}</style>
     </div>
   );
 }

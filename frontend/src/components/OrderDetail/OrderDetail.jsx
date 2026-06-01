@@ -68,22 +68,23 @@ export default function OrderDetail() {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '20px' }}>
-        {/* Left */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      <div className="order-detail-grid">
+
+        {/* ── Left column ── */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', minWidth: 0 }}>
 
           {/* Progress timeline */}
           {!isCancelled && (
             <div className="card">
               <h3 style={{ fontSize: '15px', fontWeight: 600, marginBottom: '24px' }}>Delivery Progress</h3>
-              <div style={{ display: 'flex', alignItems: 'center', position: 'relative' }}>
+              <div style={{ display: 'flex', alignItems: 'center', position: 'relative', overflowX: 'auto', paddingBottom: '4px' }}>
                 {PIPELINE.map((step, i) => {
                   const done = i <= currentStep;
                   const active = i === currentStep;
                   const isLast = i === PIPELINE.length - 1;
                   return (
                     <React.Fragment key={step}>
-                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', flex: isLast ? 'none' : '1', zIndex: 1 }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', flex: isLast ? 'none' : '1', zIndex: 1, minWidth: 56 }}>
                         <div
                           style={{
                             width: 36, height: 36, borderRadius: '50%',
@@ -93,8 +94,7 @@ export default function OrderDetail() {
                             fontSize: '14px', fontWeight: 700,
                             color: done ? 'white' : 'var(--text-muted)',
                             boxShadow: active ? '0 0 0 4px var(--accent-light)' : 'none',
-                            transition: 'all 0.3s ease', cursor: 'pointer',
-                            flexShrink: 0
+                            transition: 'all 0.3s ease', cursor: 'pointer', flexShrink: 0
                           }}
                           onClick={() => handleStatusUpdate(step)}
                           title={`Set to ${step}`}
@@ -102,7 +102,7 @@ export default function OrderDetail() {
                           {done ? '✓' : i + 1}
                         </div>
                         <span style={{
-                          fontSize: '10px', textAlign: 'center', width: '70px',
+                          fontSize: '10px', textAlign: 'center', width: '60px',
                           color: done ? 'var(--text-primary)' : 'var(--text-muted)',
                           fontWeight: active ? 600 : 400
                         }}>
@@ -111,7 +111,7 @@ export default function OrderDetail() {
                       </div>
                       {!isLast && (
                         <div style={{
-                          flex: 1, height: 2, marginBottom: '20px',
+                          flex: 1, height: 2, marginBottom: '20px', minWidth: 12,
                           background: i < currentStep ? 'var(--accent)' : 'var(--border)',
                           transition: 'background 0.3s ease'
                         }} />
@@ -140,7 +140,7 @@ export default function OrderDetail() {
               ].map(([label, val]) => (
                 <div key={label}>
                   <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '4px' }}>{label}</div>
-                  <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{val}</div>
+                  <div style={{ fontWeight: 600, color: 'var(--text-primary)', wordBreak: 'break-word' }}>{val}</div>
                 </div>
               ))}
             </div>
@@ -162,8 +162,9 @@ export default function OrderDetail() {
           )}
         </div>
 
-        {/* Right sidebar */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        {/* ── Right sidebar ── */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', minWidth: 0 }}>
+
           {/* Status Card */}
           <div className="card">
             <h3 style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.8px' }}>
@@ -192,12 +193,12 @@ export default function OrderDetail() {
             </h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <User size={15} color="var(--text-muted)" />
-                <span style={{ fontSize: '14px', color: 'var(--text-primary)', fontWeight: 500 }}>{order.customerName}</span>
+                <User size={15} color="var(--text-muted)" style={{ flexShrink: 0 }} />
+                <span style={{ fontSize: '14px', color: 'var(--text-primary)', fontWeight: 500, wordBreak: 'break-word' }}>{order.customerName}</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <Mail size={15} color="var(--text-muted)" />
-                <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>{order.customerEmail}</span>
+                <Mail size={15} color="var(--text-muted)" style={{ flexShrink: 0 }} />
+                <span style={{ fontSize: '13px', color: 'var(--text-secondary)', wordBreak: 'break-all' }}>{order.customerEmail}</span>
               </div>
             </div>
           </div>
@@ -210,22 +211,16 @@ export default function OrderDetail() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <div>
                 <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '2px' }}>Placed On</div>
-                <div style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>
-                  {new Date(order.createdAt).toLocaleString()}
-                </div>
+                <div style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>{new Date(order.createdAt).toLocaleString()}</div>
               </div>
               <div>
                 <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '2px' }}>Last Updated</div>
-                <div style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>
-                  {new Date(order.updatedAt).toLocaleString()}
-                </div>
+                <div style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>{new Date(order.updatedAt).toLocaleString()}</div>
               </div>
               {order.estimatedDelivery && (
                 <div>
                   <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '2px' }}>Est. Delivery</div>
-                  <div style={{ fontSize: '14px', color: 'var(--success)' }}>
-                    {new Date(order.estimatedDelivery).toLocaleDateString()}
-                  </div>
+                  <div style={{ fontSize: '14px', color: 'var(--success)' }}>{new Date(order.estimatedDelivery).toLocaleDateString()}</div>
                 </div>
               )}
             </div>
@@ -237,12 +232,26 @@ export default function OrderDetail() {
               <Truck size={15} color="var(--accent)" />
               <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--accent)' }}>Tracking Number</span>
             </div>
-            <div style={{ fontFamily: 'monospace', fontSize: '15px', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '1px' }}>
+            <div style={{ fontFamily: 'monospace', fontSize: '15px', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '1px', wordBreak: 'break-all' }}>
               {order.trackingNumber}
             </div>
           </div>
         </div>
       </div>
+
+      <style>{`
+        .order-detail-grid {
+          display: grid;
+          grid-template-columns: 1fr 340px;
+          gap: 20px;
+          align-items: start;
+        }
+        @media (max-width: 768px) {
+          .order-detail-grid {
+            grid-template-columns: 1fr;
+          }
+        }
+      `}</style>
     </div>
   );
 }

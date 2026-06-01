@@ -57,6 +57,7 @@
   animation: authFloat ease-in-out infinite;
 }
 
+/* ── Shell ── */
 .auth-shell {
   position: relative;
   z-index: 2;
@@ -75,6 +76,7 @@
   transform: translateY(0);
 }
 
+/* ── Hero ── */
 .auth-hero {
   color: #d5e3ff;
   padding: 18px;
@@ -134,6 +136,7 @@
   font-weight: 600;
 }
 
+/* ── Card ── */
 .auth-card {
   border-radius: 24px;
   padding: clamp(20px, 3vw, 34px);
@@ -141,8 +144,12 @@
   background: linear-gradient(165deg, rgba(7, 17, 34, 0.95), rgba(4, 11, 23, 0.95));
   box-shadow: 0 24px 65px rgba(1, 8, 20, 0.7);
   backdrop-filter: blur(9px);
+  /* Allow scroll on very small screens */
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
 }
 
+/* ── Form ── */
 .auth-form {
   display: flex;
   flex-direction: column;
@@ -162,6 +169,7 @@
   font-size: 0.95rem;
 }
 
+/* ── Fields ── */
 .auth-field {
   display: flex;
   flex-direction: column;
@@ -189,6 +197,7 @@
   left: 14px;
   transform: translateY(-50%);
   color: #83a8df;
+  pointer-events: none;
 }
 
 .auth-field__input {
@@ -198,9 +207,13 @@
   background: rgba(6, 18, 37, 0.8);
   color: #eef5ff;
   font-size: 0.95rem;
+  /* min 44px touch target */
   padding: 12px 44px;
+  min-height: 48px;
   outline: none;
   transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  /* Prevent iOS zoom on focus */
+  font-size: max(16px, 0.95rem);
 }
 
 .auth-field__input::placeholder {
@@ -221,13 +234,16 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border: none;
   border-radius: 8px;
   color: #91afd8;
   background: transparent;
   cursor: pointer;
+  /* Touch target */
+  min-width: 44px;
+  min-height: 44px;
 }
 
 .auth-field__toggle:hover {
@@ -235,6 +251,7 @@
   color: #d9e8ff;
 }
 
+/* ── Submit ── */
 .auth-submit {
   margin-top: 4px;
   display: inline-flex;
@@ -243,7 +260,9 @@
   gap: 10px;
   border: 0;
   border-radius: 13px;
-  padding: 13px 16px;
+  padding: 14px 16px;
+  min-height: 50px;
+  width: 100%;
   background: linear-gradient(96deg, #2e71ec 0%, #26b6d2 51%, #26be98 100%);
   color: #ffffff;
   font-size: 0.97rem;
@@ -260,6 +279,7 @@
 .auth-submit:disabled {
   opacity: 0.75;
   cursor: not-allowed;
+  transform: none;
 }
 
 .auth-submit__spinner {
@@ -269,8 +289,10 @@
   border-top-color: transparent;
   border-radius: 50%;
   animation: authSpin 0.7s linear infinite;
+  flex-shrink: 0;
 }
 
+/* ── Footer ── */
 .auth-footer {
   margin-top: 4px;
   text-align: center;
@@ -289,6 +311,7 @@
   text-decoration: underline;
 }
 
+/* ── Password strength ── */
 .auth-strength {
   margin-top: 6px;
 }
@@ -325,6 +348,9 @@
   color: #7be8af;
 }
 
+/* ════════════════════════════════════
+   Desktop — 2 column layout
+   ════════════════════════════════════ */
 @media (min-width: 980px) {
   .auth-shell {
     grid-template-columns: 1fr 1fr;
@@ -335,39 +361,89 @@
   .auth-hero {
     padding-left: 4px;
   }
+
+  /* Desktop card — no scroll needed */
+  .auth-card {
+    max-height: none;
+    overflow-y: visible;
+  }
 }
 
+/* ════════════════════════════════════
+   Tablet
+   ════════════════════════════════════ */
+@media (max-width: 979px) and (min-width: 581px) {
+  .auth-page {
+    padding: 24px 20px;
+    align-items: flex-start;
+  }
+
+  /* Hide hero on tablet — only show card */
+  .auth-hero {
+    display: none;
+  }
+
+  .auth-shell {
+    max-width: 480px;
+    margin: 0 auto;
+  }
+}
+
+/* ════════════════════════════════════
+   Mobile
+   ════════════════════════════════════ */
 @media (max-width: 580px) {
   .auth-page {
-    padding: 20px 14px;
+    padding: 16px 12px;
+    align-items: flex-start;
+  }
+
+  /* Hide decorative hero on mobile */
+  .auth-hero {
+    display: none;
+  }
+
+  .auth-shell {
+    gap: 0;
   }
 
   .auth-card {
     border-radius: 18px;
-    padding: 18px;
+    padding: 20px 16px;
+    max-height: calc(100vh - 32px);
+    overflow-y: auto;
   }
 
   .auth-form__title {
     font-size: 1.65rem;
   }
+
+  .auth-form {
+    gap: 16px;
+  }
 }
 
+/* ════════════════════════════════════
+   Very small (320px)
+   ════════════════════════════════════ */
+@media (max-width: 360px) {
+  .auth-card {
+    padding: 16px 12px;
+    border-radius: 14px;
+  }
+
+  .auth-form__title {
+    font-size: 1.4rem;
+  }
+}
+
+/* ── Animations ── */
 @keyframes authFloat {
-  0%, 100% {
-    transform: translateY(0);
-    opacity: 0.15;
-  }
-  50% {
-    transform: translateY(-14px);
-    opacity: 0.8;
-  }
+  0%, 100% { transform: translateY(0);     opacity: 0.15; }
+  50%       { transform: translateY(-14px); opacity: 0.8;  }
 }
 
 @keyframes authSpin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
 }

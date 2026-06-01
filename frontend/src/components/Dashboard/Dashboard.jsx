@@ -13,7 +13,7 @@ const StatCard = ({ icon: Icon, label, value, color, bg }) => (
     }}>
       <Icon size={22} color={color} />
     </div>
-    <div>
+    <div style={{ minWidth: 0 }}>
       <div style={{ fontSize: '24px', fontWeight: 700, color: 'var(--text-primary)' }}>{value}</div>
       <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>{label}</div>
     </div>
@@ -51,29 +51,23 @@ export default function Dashboard() {
           <p className="page-subtitle">Overview of your order management system</p>
         </div>
         <Link to="/orders/new" className="btn btn-primary">
-          <PlusCircle size={16} /> Place New Order
+          <PlusCircle size={16} />
+          <span className="btn-label">Place New Order</span>
         </Link>
       </div>
 
       {/* Stats */}
       <div className="stats-grid">
-        <StatCard icon={ShoppingCart} label="Total Orders" value={stats?.totalOrders ?? 0}
-          color="var(--accent)" bg="var(--accent-light)" />
-        <StatCard icon={Clock} label="Pending" value={stats?.pendingOrders ?? 0}
-          color="var(--warning)" bg="var(--warning-light)" />
-        <StatCard icon={TrendingUp} label="Processing" value={stats?.processingOrders ?? 0}
-          color="var(--purple)" bg="var(--purple-light)" />
-        <StatCard icon={Truck} label="Shipped" value={stats?.shippedOrders ?? 0}
-          color="#06b6d4" bg="rgba(6,182,212,0.1)" />
-        <StatCard icon={CheckCircle} label="Delivered" value={stats?.deliveredOrders ?? 0}
-          color="var(--success)" bg="var(--success-light)" />
-        <StatCard icon={XCircle} label="Cancelled" value={stats?.cancelledOrders ?? 0}
-          color="var(--danger)" bg="var(--danger-light)" />
-        <StatCard icon={DollarSign} label="Total Revenue" value={`$${(stats?.totalRevenue ?? 0).toFixed(2)}`}
-          color="var(--success)" bg="var(--success-light)" />
+        <StatCard icon={ShoppingCart} label="Total Orders"  value={stats?.totalOrders ?? 0}        color="var(--accent)"   bg="var(--accent-light)" />
+        <StatCard icon={Clock}        label="Pending"       value={stats?.pendingOrders ?? 0}      color="var(--warning)"  bg="var(--warning-light)" />
+        <StatCard icon={TrendingUp}   label="Processing"    value={stats?.processingOrders ?? 0}   color="var(--purple)"   bg="var(--purple-light)" />
+        <StatCard icon={Truck}        label="Shipped"       value={stats?.shippedOrders ?? 0}      color="#06b6d4"         bg="rgba(6,182,212,0.1)" />
+        <StatCard icon={CheckCircle}  label="Delivered"     value={stats?.deliveredOrders ?? 0}    color="var(--success)"  bg="var(--success-light)" />
+        <StatCard icon={XCircle}      label="Cancelled"     value={stats?.cancelledOrders ?? 0}    color="var(--danger)"   bg="var(--danger-light)" />
+        <StatCard icon={DollarSign}   label="Total Revenue" value={`$${(stats?.totalRevenue ?? 0).toFixed(2)}`} color="var(--success)" bg="var(--success-light)" />
       </div>
 
-      {/* Recent Orders Table */}
+      {/* Recent Orders */}
       <div className="card">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
           <h2 style={{ fontSize: '16px', fontWeight: 600 }}>Recent Orders</h2>
@@ -93,10 +87,10 @@ export default function Dashboard() {
                 <tr>
                   <th>Tracking #</th>
                   <th>Customer</th>
-                  <th>Product</th>
+                  <th className="hide-mobile">Product</th>
                   <th>Amount</th>
                   <th>Status</th>
-                  <th>Date</th>
+                  <th className="hide-mobile">Date</th>
                 </tr>
               </thead>
               <tbody>
@@ -104,10 +98,10 @@ export default function Dashboard() {
                   <tr key={order.id}>
                     <td><code style={{ fontSize: '12px', color: 'var(--accent)' }}>{order.trackingNumber}</code></td>
                     <td><strong>{order.customerName}</strong></td>
-                    <td>{order.productName}</td>
+                    <td className="hide-mobile">{order.productName}</td>
                     <td><strong>${order.totalAmount?.toFixed(2)}</strong></td>
                     <td><StatusBadge status={order.status} /></td>
-                    <td style={{ color: 'var(--text-muted)', fontSize: '13px' }}>
+                    <td className="hide-mobile" style={{ color: 'var(--text-muted)', fontSize: '13px' }}>
                       {new Date(order.createdAt).toLocaleDateString()}
                     </td>
                   </tr>
@@ -117,6 +111,13 @@ export default function Dashboard() {
           </div>
         )}
       </div>
+
+      <style>{`
+        @media (max-width: 768px) {
+          .hide-mobile { display: none; }
+          .btn-label { display: none; }
+        }
+      `}</style>
     </div>
   );
 }
